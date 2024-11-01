@@ -13,6 +13,21 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
+
+    #Can add what services to be put
+    services:
+      postgres:
+        image: postgres:12
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: secret
+          POSTGRES_DB: simple_bank
+        options: >- 
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
     - name: Set up Go
       uses: actions/setup-go@v2
@@ -23,5 +38,13 @@ jobs:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
 
+    - name: Install go-lang migrate
+      run: | 
+        curl -L https://github.com/golang-migrate/migrate/releases/download/v4.18.1/migrate.linux-amd64.tar.gz | tar xvz
+
+    - name: Run Migrations 
+      run: make migrateup
+
+    # Build automatically happens , so its not required here
     - name: Test
       run: make test 
